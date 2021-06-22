@@ -1,33 +1,37 @@
 import React from 'react';
-import {
-  TextInput,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import {TextInput, StyleSheet, View} from 'react-native';
 import {COLORS} from '../utils/constants';
 
 function SearchBar(props) {
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{flex: 1}}>
+    <View style={styles.container}>
       <TextInput
+        autoCapitalize="none"
+        autoCorrect={false}
+        onChangeText={props.handleSearch}
+        status="info"
+        placeholder="Search"
         style={styles.textInput}
-        placeholder={'Search users here...'}
+        textStyle={{color: '#000'}}
       />
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#fff',
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   textInput: {
-    width: '90%',
-    height: '10%',
-    alignSelf: 'center',
-    borderWidth: 1,
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    width: '70%',
     borderColor: COLORS.GREY_BORDER,
-    borderRadius: 10,
+    backgroundColor: '#fff',
+    borderWidth: 1,
   },
 });
 

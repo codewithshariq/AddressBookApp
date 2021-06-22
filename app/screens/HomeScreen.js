@@ -1,37 +1,91 @@
 import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, FlatList} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import userServices from '../api/UserServices';
+import {useDispatch, useSelector, shallowEqual} from 'react-redux';
+import {getUsersData} from '../redux/actions';
 import ListItem from '../components/ListItem';
 import SearchBar from '../components/SearchBar';
+import {createSelector} from 'reselect';
+import UserDetailsModal from '../components/UserDetailsModal';
+import _ from 'lodash';
+import {updateData} from '../redux/reducers/Users';
+
+const selectUsers = createSelector(
+  state => state.users,
+  users => users,
+);
 
 function HomeScreen(props) {
-  const dispatch = useDispatch;
+  const dispatch = useDispatch();
 
   useEffect(function () {
-    const getUserData = async () => {
-      try {
-        const {
-          result: {data},
-        } = await userServices.fetchUsers();
-        dispatch({users: data.results});
-      } catch (err) {}
-    };
+    dispatch(getUsersData());
+  }, []);
 
-    getUserData();
-  });
+  const dummyProps = {
+    location: {
+      street: '',
+      city: '',
+      state: '',
+    },
+    cell: '',
+    phone: '',
+  };
 
-  const users = useSelector(state => state.users);
+  const usersData = useSelector(selectUsers);
+  const [showModal, setShowModal] = useState(false);
+  const [modalProps, setModalProps] = useState(dummyProps);
+
+  const renderUserDetailsModal = (modalProps, isModalVisible) => {
+    setShowModal(isModalVisible);
+    setModalProps(modalProps);
+  };
+
+  const renderUsersData = ({item}) => {
+    return (
+      <ListItem {...item} renderUserDetailsModal={renderUserDetailsModal} />
+    );
+  };
+
+  const handleSearch = text => {
+    const formattedQuery = text.toLowerCase();
+
+    const data = _.filter(usersData, user => {
+      return contains(user, formattedQuery);
+    });
+    dispatch(updateData({users: data}));
+  };
+
+  const contains = ({name, email}, query) => {
+    const {first, last} = name;
+
+    if (
+      first.includes(query) ||
+      last.includes(query) ||
+      email.includes(query)
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  console.log('This is usersData', usersData);
 
   return (
     <View style={styles.container}>
-      <FlatList></FlatList>
-      <ListItem
-        name={{first: 'Shariq', last: 'Khan', username: 'shariq123'}}
-        email={'shariq@gmail.com'}
-        imageSource={'https://picsum.photos/200/300'}
+      <SearchBar handleSearch={handleSearch} />
+      <FlatList
+        data={usersData}
+        renderItem={renderUsersData}
+        ItemSeparatorComponent={() => <View style={styles.seperator} />}
+        keyExtractor={item => item.login.uuid}
+        // onEndReached={() => dispatch(getUsersData())}
       />
-      <SearchBar />
+      <UserDetailsModal
+        {...modalProps}
+        showModal={showModal}
+        closeModal={() => setShowModal(false)}
+      />
     </View>
   );
 }
@@ -40,6 +94,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  seperator: {
+    height: 8,
   },
 });
 

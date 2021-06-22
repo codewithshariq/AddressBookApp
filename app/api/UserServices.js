@@ -8,7 +8,9 @@ import http from './HttpServices';
  */
 const fetchUsers = async (limit, fields) => {
   return await http.get('https://randomuser.me/api/', {
-    inc: fields ? fields.join(', ') : `name, email, location, phone, cell`,
+    inc: fields
+      ? fields.join(', ')
+      : `name, email, location, phone, cell, picture, login`,
     results: limit ? limit : 50,
   });
 };
