@@ -6,18 +6,16 @@ const usersSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {
-    addUsers: (state, action) => {
+    setUsers: (state, action) => {
+      state = action.payload.users;
+      return state;
+    },
+    appendUsers: (state, action) => {
       state = [...state, ...action.payload.users];
       return state;
     },
-    updateData: (state, action) => {
-      state = action.payload.users;
-      console.log('This is state', state);
-      return state;
-    },
-    deleteUsers: (state, action) => {},
   },
 });
 
-export const {addUsers, deleteUsers, updateData} = usersSlice.actions;
+export const {setUsers, appendUsers} = usersSlice.actions;
 export default usersSlice.reducer;

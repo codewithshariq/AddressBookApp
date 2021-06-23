@@ -1,13 +1,13 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useLayoutEffect} from 'react';
 import {View, StyleSheet, FlatList} from 'react-native';
-import {useDispatch, useSelector, shallowEqual} from 'react-redux';
-import {getUsersData} from '../redux/actions';
+import {useDispatch, useSelector} from 'react-redux';
+import {getUsersData, appendUserData} from '../redux/actions';
 import ListItem from '../components/ListItem';
 import SearchBar from '../components/SearchBar';
 import {createSelector} from 'reselect';
 import UserDetailsModal from '../components/UserDetailsModal';
 import _ from 'lodash';
-import {updateData} from '../redux/reducers/Users';
+import SettingsButton from '../components/SettingsButton';
 
 const selectUsers = createSelector(
   state => state.users,
@@ -20,6 +20,20 @@ function HomeScreen(props) {
   useEffect(function () {
     dispatch(getUsersData());
   }, []);
+
+  useLayoutEffect(() => {
+    props.navigation.setOptions({
+      title: 'Home Page',
+      headerRight: () => (
+        <SettingsButton
+          naviagteToSettings={() => props.navigation.navigate('Settings')}
+        />
+      ),
+      headerRightContainerStyle: {
+        paddingRight: 15,
+      },
+    });
+  }, [props.navigation]);
 
   const dummyProps = {
     location: {
@@ -34,6 +48,7 @@ function HomeScreen(props) {
   const usersData = useSelector(selectUsers);
   const [showModal, setShowModal] = useState(false);
   const [modalProps, setModalProps] = useState(dummyProps);
+  const [searchText, setSearchText] = useState('');
 
   const renderUserDetailsModal = (modalProps, isModalVisible) => {
     setShowModal(isModalVisible);
@@ -47,29 +62,10 @@ function HomeScreen(props) {
   };
 
   const handleSearch = text => {
+    setSearchText(text);
     const formattedQuery = text.toLowerCase();
-
-    const data = _.filter(usersData, user => {
-      return contains(user, formattedQuery);
-    });
-    dispatch(updateData({users: data}));
+    dispatch(getUsersData({formattedQuery}));
   };
-
-  const contains = ({name, email}, query) => {
-    const {first, last} = name;
-
-    if (
-      first.includes(query) ||
-      last.includes(query) ||
-      email.includes(query)
-    ) {
-      return true;
-    }
-
-    return false;
-  };
-
-  console.log('This is usersData', usersData);
 
   return (
     <View style={styles.container}>
@@ -79,7 +75,9 @@ function HomeScreen(props) {
         renderItem={renderUsersData}
         ItemSeparatorComponent={() => <View style={styles.seperator} />}
         keyExtractor={item => item.login.uuid}
-        // onEndReached={() => dispatch(getUsersData())}
+        onEndReached={() => {
+          !searchText && dispatch(appendUserData());
+        }}
       />
       <UserDetailsModal
         {...modalProps}
