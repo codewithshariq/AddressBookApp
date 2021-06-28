@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet, Text} from 'react-native';
-import FilterOption from '../components/FilterOption';
+import FilterOption from '../components/FilterScreen/FilterOption';
 import {useSelector} from 'react-redux';
 import {createSelector} from 'reselect';
 
