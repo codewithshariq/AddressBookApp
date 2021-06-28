@@ -1,41 +1,46 @@
 import React, {useEffect, useState, useLayoutEffect} from 'react';
 import {View, StyleSheet, FlatList} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {getUsersData, appendUserData} from '../redux/actions';
-import ListItem from '../components/ListItem';
-import SearchBar from '../components/SearchBar';
+import {getUsersData, appendUserData} from '../redux/operators';
+import ListItem from '../components/HomeScreen/ListItem';
+import SearchBar from '../components/HomeScreen/SearchBar';
 import {createSelector} from 'reselect';
-import UserDetailsModal from '../components/UserDetailsModal';
+import UserDetailsModal from '../components/HomeScreen/UserDetailsModal';
 import _ from 'lodash';
-import SettingsButton from '../components/SettingsButton';
+import SettingsButton from '../components/HomeScreen/SettingsButton';
+import {useIsFocused} from '@react-navigation/native';
 
 const selectUsers = createSelector(
   state => state.users,
   users => users,
 );
 
-function HomeScreen(props) {
+function HomeScreen({navigation}) {
   const dispatch = useDispatch();
+  const isFocused = useIsFocused();
 
-  useEffect(function () {
-    dispatch(getUsersData());
-  }, []);
+  useEffect(
+    function () {
+      isFocused && dispatch(getUsersData());
+    },
+    [isFocused],
+  );
 
   useLayoutEffect(() => {
-    props.navigation.setOptions({
+    navigation.setOptions({
       title: 'Home Page',
       headerRight: () => (
         <SettingsButton
-          naviagteToSettings={() => props.navigation.navigate('Settings')}
+          naviagteToSettings={() => navigation.navigate('Settings')}
         />
       ),
       headerRightContainerStyle: {
         paddingRight: 15,
       },
     });
-  }, [props.navigation]);
+  }, [navigation]);
 
-  const dummyProps = {
+  const initialProps = {
     location: {
       street: '',
       city: '',
@@ -45,9 +50,9 @@ function HomeScreen(props) {
     phone: '',
   };
 
-  const usersData = useSelector(selectUsers);
+  const users = useSelector(selectUsers);
   const [showModal, setShowModal] = useState(false);
-  const [modalProps, setModalProps] = useState(dummyProps);
+  const [modalProps, setModalProps] = useState(initialProps);
   const [searchText, setSearchText] = useState('');
 
   const renderUserDetailsModal = (modalProps, isModalVisible) => {
@@ -71,12 +76,15 @@ function HomeScreen(props) {
     <View style={styles.container}>
       <SearchBar handleSearch={handleSearch} />
       <FlatList
-        data={usersData}
+        refreshing={users.status === 'idle' || users.status === 'pending'}
+        data={users.data}
         renderItem={renderUsersData}
         ItemSeparatorComponent={() => <View style={styles.seperator} />}
-        keyExtractor={item => item.login.uuid}
+        keyExtractor={item => {
+          return item.login.uuid;
+        }}
         onEndReached={() => {
-          !searchText && dispatch(appendUserData());
+          !searchText && users.length < 1000 && dispatch(appendUserData());
         }}
       />
       <UserDetailsModal

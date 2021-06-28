@@ -6,8 +6,18 @@ export const COLORS = {
 };
 
 export const COUNTRY_LIST = [
-  {dataCode: 'CH', countryName: 'Switzerland'},
-  {dataCode: 'ES', countryName: 'Spain'},
-  {dataCode: 'FR', countryName: 'France'},
-  {dataCode: 'GB', countryName: 'United Kingdom'},
+  {dataCode: 'CH', countryName: 'Switzerland', selected: false},
+  {dataCode: 'ES', countryName: 'Spain', selected: false},
+  {dataCode: 'FR', countryName: 'France', selected: false},
+  {dataCode: 'GB', countryName: 'United Kingdom', selected: false},
+];
+
+export const DEFAULT_FIELDS = [
+  'name',
+  'email',
+  'location',
+  'phone',
+  'cell',
+  'picture',
+  'login',
 ];

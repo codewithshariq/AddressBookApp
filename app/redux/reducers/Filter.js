@@ -1,15 +1,9 @@
 import {createSlice} from '@reduxjs/toolkit';
-
-const initialState = [
-  {dataCode: 'CH', countryName: 'Switzerland', selected: false},
-  {dataCode: 'ES', countryName: 'Spain', selected: false},
-  {dataCode: 'FR', countryName: 'France', selected: false},
-  {dataCode: 'GB', countryName: 'United Kingdom', selected: false},
-];
+import {COUNTRY_LIST} from '../../utils/constants';
 
 const filterSlice = createSlice({
   name: 'filterOptions',
-  initialState,
+  initialState: COUNTRY_LIST,
   reducers: {
     setFilterOptions: (state, action) => {
       const index = state.findIndex(

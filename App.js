@@ -7,8 +7,6 @@ import React from 'react';
 import {SafeAreaView, StyleSheet, Platform, StatusBar} from 'react-native';
 import {Provider} from 'react-redux';
 import store from './app/redux/store';
-import HomeScreen from './app/screens/HomeScreen';
-import SearchFilterScreen from './app/screens/SearchFilterScreen';
 import Router from './app/router';
 
 const App = () => {
